@@ -3,9 +3,32 @@
     use \Psr\Http\Message\ResponseInterface as Response;
     use Firebase\JWT\JWT;
 
+    //Crear Nuevo Usuario
+    $app->post("/user", function (Request $request, Response $response, array $args) {
+        //Hay que asegurarse de que no se creen 2 usuarios con el mismo mail!!!
+        $body = $request->getParsedBody();
+        $data = array(
+            "email" => $body["email"],
+            "password" => password_hash($body["password"], PASSWORD_BCRYPT),
+            "nombre" => $body["nombre"],
+            "p_get" => true,
+            "p_post" => true,
+            "p_put" => true,
+            "p_patch" => true,
+            "p_delete" => true,
+            "ingreso" => date("Y-m-d"),
+            "idtipo" => 1,
+            "activo" => 1
+        );
+        $respuesta = dbPostWithData("usuarios", $data);
+        return $response
+            ->withStatus(201) //Created
+            ->withHeader("Content-Type", "application/json")
+            ->write(json_encode($respuesta, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+    });
+
     //Login (cambiar a post y verificar user y pass en la DB!)
     $app->post("/user/login", function (Request $request, Response $response, array $args) {
-        $respuesta = new stdClass();
         $respuesta = new stdClass();
         $respuesta->err = false;
         $respuesta->errMsg = array(); //Ojo con esto!
@@ -39,7 +62,6 @@
         if($validar->validar($request->getParsedBody(), $reglas)) {
             $email = $request->getParsedBody()["email"];
             $pass = $request->getParsedBody()["password"];
-            //Hay que asegurarse de que no se creen 2 usuarios con el mismo mail!!!
             $xSQL = "SELECT id, email, password, nombre, p_get, p_post, p_put, p_patch, p_delete, ingreso, idtipo FROM usuarios";
             $xSQL .= " WHERE activo = 1";
             $xSQL .= " AND email = '" . $email . "'";

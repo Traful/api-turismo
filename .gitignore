@@ -3,6 +3,11 @@
 # dependencies
 /vendor
 /public/.env
+/public/atractivos
+/public/imagenes
+/public/imgs
+/public/logos
+/public/mapas
 
 npm-debug.log*
 yarn-debug.log*

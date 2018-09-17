@@ -203,6 +203,7 @@
     });
 
     //Agregar un Servicio a una Guía en particular
+
     $app->post("/guia/{idGuia:[0-9]+}/servicio/add/{idServicio:[0-9]+}", function (Request $request, Response $response, array $args) {
         //Verificar que no posee el Servicio
         $xSQL = "SELECT guiaservicios.id, guias.nombre, servicios.descripcion FROM guiaservicios";
@@ -239,6 +240,7 @@
     });
 
     //Agregar una Red Social a una Guía en particular
+
     $app->post("/guia/{idGuia:[0-9]+}/red/add/{idRed:[0-9]+}", function (Request $request, Response $response, array $args) {
         //Verificar que no posee la Red Social
         $xSQL = "SELECT guia_redes.id, redes.nombre, guias.nombre AS nombreguia FROM guia_redes";
@@ -295,6 +297,7 @@
     });
 
     //Agregar una Tarifa a una Guía en particular
+
     $app->post("/guia/{idGuia:[0-9]+}/tarifa/add/{idTarifa:[0-9]+}", function (Request $request, Response $response, array $args) {
         //Verificar que no posee la Tarifa
         $xSQL = "SELECT guia_tarifas.id, tipo_tarifas.descripcion FROM guia_tarifas";
@@ -488,6 +491,9 @@
             ),
             "r_vencimiento" => array(
                 "tag" => "Fecha de vencimiento del cargo del Responsable"
+            ),
+            "epoca" => array(
+                "tag" => "Época de Prestación de Servicio"
             )
         );
         $validar = new Validate();
@@ -504,97 +510,116 @@
 		        $tamanio_maximo = $this->get("max_file_size");
 		        $formatos_permitidos = $this->get("allow_file_format");
 		        $uploadedFiles = $request->getUploadedFiles();
-		        $filename = "";
+                $filename = "";
+                $err = false;
+                
 		        if(isset($uploadedFiles["logo"])) {
 		            $uploadedFile = $uploadedFiles["logo"];
 		            if($uploadedFile->getError() === UPLOAD_ERR_OK) {
 		                if($uploadedFile->getSize() <= $tamanio_maximo) {
 		                    if(in_array($uploadedFile->getClientMediaType(), $formatos_permitidos)) {
 		                        $filename = moveUploadedFile($directory, $uploadedFile, 1, $args["id"]);
-		                    }
-		                }
-		            }
+		                    } else {
+                                $err = true;
+                            }
+		                } else {
+                            $err = true;
+                        }
+		            } else {
+                        $err = true;
+                    }
 		        }
 
-		        $eliminar_viejo_logo = false;
-		        $nombre_viejo_logo = $parsedBody["logo"];
-		        if($filename == "") {
-		        	$filename = $nombre_viejo_logo;
-		        } else {
-		        	$eliminar_viejo_logo = true;
-		        }
+                if($err === false) {
+                    $eliminar_viejo_logo = false;
+                    $nombre_viejo_logo = $parsedBody["logo"];
+                    if($filename == "") {
+                        $filename = $nombre_viejo_logo;
+                    } else {
+                        $eliminar_viejo_logo = true;
+                    }
 
-		        //Actualización del registro
-		        $fecha = date("Y-m-d");
-		        $vencimiento = "2018-01-01";
-		        if($parsedBody["r_vencimiento"] <> "") {
-		        	$vencimiento = $parsedBody["r_vencimiento"];
-		        }
-                $data = array(
-                    "idciudad" => $parsedBody["idciudad"],
-                    "idtipo" => $parsedBody["idtipo"],
-                    "idvalortipcat" => $parsedBody["idvalortipcat"],
-                    "nombre" => $parsedBody["nombre"],
-                    "legajo" => $parsedBody["legajo"],
-                    "domicilio" => $parsedBody["domicilio"],
-                    "telefono" => $parsedBody["telefono"],
-                    "habitaciones" => $parsedBody["habitaciones"],
-                    "camas" => $parsedBody["camas"],
-                    "plazas" => $parsedBody["plazas"],
-                    "mail" => $parsedBody["mail"],
-                    "web" => $parsedBody["web"],
-                    "latitud" => $parsedBody["latitud"],
-                    "longitud" => $parsedBody["longitud"],
-                    "descripcion" => $parsedBody["descripcion"],
-                    "logo" => $filename,
-                    "notas" => $parsedBody["notas"],
-                    "lupdate" => $fecha,
-                    "iduser" => $parsedBody["iduser"],
-                    "activo" => $parsedBody["activo"],
-                    "p_nombre" => $parsedBody["p_nombre"],
-                    "p_telefono" => $parsedBody["p_telefono"],
-                    "p_mail" => $parsedBody["p_mail"],
-                    "p_domicilio" => $parsedBody["p_domicilio"],
-                    "p_dni" => $parsedBody["p_dni"],
-                    "r_nombre" => $parsedBody["r_nombre"],
-                    "r_telefono" => $parsedBody["r_telefono"],
-                    "r_mail" => $parsedBody["r_mail"],
-                    "r_domicilio" => $parsedBody["r_domicilio"],
-                    "r_dni" => $parsedBody["r_dni"],
-                    "r_cargo" => $parsedBody["r_cargo"],
-                    "r_vencimiento" => $vencimiento
-                );
+                    //Actualización del registro
+                    $fecha = date("Y-m-d");
+                    $vencimiento = "2018-01-01";
+                    if($parsedBody["r_vencimiento"] <> "") {
+                        $vencimiento = $parsedBody["r_vencimiento"];
+                    }
+                    $data = array(
+                        "idciudad" => $parsedBody["idciudad"],
+                        "idtipo" => $parsedBody["idtipo"],
+                        "idvalortipcat" => $parsedBody["idvalortipcat"],
+                        "nombre" => $parsedBody["nombre"],
+                        "legajo" => $parsedBody["legajo"],
+                        "domicilio" => $parsedBody["domicilio"],
+                        "telefono" => $parsedBody["telefono"],
+                        "habitaciones" => $parsedBody["habitaciones"],
+                        "camas" => $parsedBody["camas"],
+                        "plazas" => $parsedBody["plazas"],
+                        "mail" => $parsedBody["mail"],
+                        "web" => $parsedBody["web"],
+                        "latitud" => $parsedBody["latitud"],
+                        "longitud" => $parsedBody["longitud"],
+                        "descripcion" => $parsedBody["descripcion"],
+                        "logo" => $filename,
+                        "notas" => $parsedBody["notas"],
+                        "lupdate" => $fecha,
+                        "iduser" => $parsedBody["iduser"],
+                        "activo" => $parsedBody["activo"],
+                        "p_nombre" => $parsedBody["p_nombre"],
+                        "p_telefono" => $parsedBody["p_telefono"],
+                        "p_mail" => $parsedBody["p_mail"],
+                        "p_domicilio" => $parsedBody["p_domicilio"],
+                        "p_dni" => $parsedBody["p_dni"],
+                        "r_nombre" => $parsedBody["r_nombre"],
+                        "r_telefono" => $parsedBody["r_telefono"],
+                        "r_mail" => $parsedBody["r_mail"],
+                        "r_domicilio" => $parsedBody["r_domicilio"],
+                        "r_dni" => $parsedBody["r_dni"],
+                        "r_cargo" => $parsedBody["r_cargo"],
+                        "r_vencimiento" => $vencimiento,
+                        "epoca" => $parsedBody["epoca"]
+                    );
 
-                $respuesta = dbPatchWithData("guias", $args["id"], $data);
-                if($respuesta->err == false) {
-                	//Eliminar la vieja Imagen
-                	if(($eliminar_viejo_logo == true) && ($nombre_viejo_logo <> "default.jpg")) {
-                		@unlink($this->get("upload_directory_logo") . DIRECTORY_SEPARATOR . $nombre_viejo_logo);
-                		/*
-                		$resperr = new stdClass();
-			            $resperr->err = true;
-			            $resperr->errMsg = "Error al eliminar el logo en: " . $this->get("upload_directory_logo") . DIRECTORY_SEPARATOR . $nombre_viejo_logo;
-			            return $response
-			                ->withStatus(409) //Conflicto
-			                ->withHeader("Content-Type", "application/json")
-			                ->write(json_encode($resperr, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
-			            */
-                	}
-                	$respuesta->logo = $filename;
-                	return $response
-	                    ->withStatus(200) //Ok
-	                    ->withHeader("Content-Type", "application/json")
-	                    ->write(json_encode($respuesta, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
-                } else {
-                	//En caso de que dbPatchWithData devolviese un error habría que eliminar la imagen subida si es que se subio alguna
-                	//Inconcluso!!!
-                	$resperr = new stdClass();
-		            $resperr->err = true;
-		            $resperr->errMsg = $respuesta->errMsg;
-		            return $response
-		                ->withStatus(409) //Conflicto
-		                ->withHeader("Content-Type", "application/json")
-		                ->write(json_encode($resperr, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+                    $respuesta = dbPatchWithData("guias", $args["id"], $data);
+                    if($respuesta->err == false) {
+                        //Eliminar la vieja Imagen
+                        if(($eliminar_viejo_logo == true) && ($nombre_viejo_logo <> "default.jpg")) {
+                            @unlink($this->get("upload_directory_logo") . DIRECTORY_SEPARATOR . $nombre_viejo_logo);
+                            /*
+                            $resperr = new stdClass();
+                            $resperr->err = true;
+                            $resperr->errMsg = "Error al eliminar el logo en: " . $this->get("upload_directory_logo") . DIRECTORY_SEPARATOR . $nombre_viejo_logo;
+                            return $response
+                                ->withStatus(409) //Conflicto
+                                ->withHeader("Content-Type", "application/json")
+                                ->write(json_encode($resperr, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+                            */
+                        }
+                        $respuesta->logo = $filename;
+                        return $response
+                            ->withStatus(200) //Ok
+                            ->withHeader("Content-Type", "application/json")
+                            ->write(json_encode($respuesta, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+                    } else {
+                        //En caso de que dbPatchWithData devolviese un error habría que eliminar la imagen subida si es que se subio alguna
+                        //Inconcluso!!!
+                        $resperr = new stdClass();
+                        $resperr->err = true;
+                        $resperr->errMsg = $respuesta->errMsg;
+                        return $response
+                            ->withStatus(409) //Conflicto
+                            ->withHeader("Content-Type", "application/json")
+                            ->write(json_encode($resperr, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+                    }
+                } else { //Ocurrió un error al subir la imágen
+                    $resperr = new stdClass();
+                    $resperr->err = true;
+                    $resperr->errMsg = "Ocurrió un error al procesar la imágen, inténtelo nuevamente, recuerde que no pude superar los 4MB, debe ser un formato de imagen válido.";
+                    return $response
+                        ->withStatus(409) //Conflicto
+                        ->withHeader("Content-Type", "application/json")
+                        ->write(json_encode($resperr, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
                 }
         	} else {
         		$resperr = new stdClass();
