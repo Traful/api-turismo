@@ -7,6 +7,7 @@
 /public/imgs
 /public/logos
 /public/mapas
+/public/recursos
 
 npm-debug.log*
 yarn-debug.log*
