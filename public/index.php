@@ -27,8 +27,18 @@
     $container = $app->getContainer();
     $container["upload_directory"] = __DIR__ . DIRECTORY_SEPARATOR . "imagenes";
     $container["upload_directory_logo"] = __DIR__ . DIRECTORY_SEPARATOR . "logos";
-    $container["upload_directory_mapa"] = __DIR__ . DIRECTORY_SEPARATOR . "mapas";
     $container["upload_directory_atractivo"] = __DIR__ . DIRECTORY_SEPARATOR . "atractivos";
+
+    //Zonas
+    $container["upload_directory_mapa"] = __DIR__ . DIRECTORY_SEPARATOR . "mapas";
+    //Fotos de las Zonas (Menu)
+    $container["upload_directory_zonas"] = __DIR__ . DIRECTORY_SEPARATOR . "recursos" . DIRECTORY_SEPARATOR . "zonas";
+
+
+    //$container["api_host"] = "http://hansjal.esy.es/api-turismo/public";
+    $container["api_host"] = "http:" . DIRECTORY_SEPARATOR . DIRECTORY_SEPARATOR . "hansjal.esy.es" . DIRECTORY_SEPARATOR . "api-turismo" . DIRECTORY_SEPARATOR . "public";
+
+
     $container["max_file_size"] = 4194304; //4 MB
     $container["allow_file_format"] = ["image/jpg", "image/png", "image/jpeg", "image/gif", "image/bmp", "image/svg", "image/ico"]; //Imagenes
 

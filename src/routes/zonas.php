@@ -6,7 +6,13 @@
 
     //Todas las Zonas (Activas)
     $app->get("/zonas", function (Request $request, Response $response, array $args) {
-        $respuesta = dbGet("SELECT id, nombre FROM zonas WHERE activo = 1 ORDER BY nombre");
+        $respuesta = dbGet("SELECT * FROM zonas WHERE activo = 1 ORDER BY nombre");
+        //Settings Path imágenes y fotos
+        $host = $this->get("api_host");
+        for($i=0; $i < count($respuesta->data["registros"]); $i++) {
+            $respuesta->data["registros"][$i]->mapa = $host . DIRECTORY_SEPARATOR . "mapas" . DIRECTORY_SEPARATOR . $respuesta->data["registros"][$i]->mapa;
+            $respuesta->data["registros"][$i]->foto = $host . DIRECTORY_SEPARATOR . "recursos" . DIRECTORY_SEPARATOR . "zonas" . DIRECTORY_SEPARATOR . $respuesta->data["registros"][$i]->foto;
+        }
         return $response
             ->withStatus(200)
             ->withHeader("Content-Type", "application/json")

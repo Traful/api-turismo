@@ -2,7 +2,6 @@
 
 # dependencies
 /vendor
-/public/.env
 /public/atractivos
 /public/imagenes
 /public/imgs
