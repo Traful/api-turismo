@@ -33,7 +33,7 @@
     //Todas los Ciudades de una determinada Zona
     $app->get("/zona/{idzona:[0-9]+}/ciudades", function (Request $request, Response $response, array $args) {
         //Ciudades de la Zona
-        $xSQL = "SELECT zonas_ciudades.id, ciudades.nombre as ciudad, departamentos.nombre as departamento FROM zonas_ciudades";
+        $xSQL = "SELECT zonas_ciudades.id, zonas_ciudades.idciudad, ciudades.nombre as ciudad, departamentos.nombre as departamento FROM zonas_ciudades";
         $xSQL .= " INNER JOIN ciudades ON zonas_ciudades.idciudad = ciudades.id";
         $xSQL .= " INNER JOIN departamentos ON ciudades.iddepartamento = departamentos.id";
         $xSQL .= " WHERE zonas_ciudades.idzona = " . $args["idzona"];
@@ -64,6 +64,9 @@
                 "nombre" => $parsedBody["nombre"],
                 "descripcion" => "",
                 "mapa" => "default.jpg",
+                "foto" => "default.jpg",
+                "mini" => "default.jpg",
+                "color" => "000000",
                 "activo" => 1
             );
             $respuesta = dbPostWithData("zonas", $data);
@@ -97,47 +100,105 @@
             "mapa" => array(
                 "tag" => "Mapa"
             ),
+            "foto" => array(
+                "tag" => "Foto"
+            ),
+            "mini" => array(
+                "tag" => "Mini Mapa San Luis"
+            ),
             "activo" => array(
                 "tag" => "Activo"
+            ),
+            "color" => array(
+                "max" => 10,
+                "tag" => "Color"
             )
         );
         $validar = new Validate();
         if($validar->validar($request->getParsedBody(), $reglas)) {
             $parsedBody = $request->getParsedBody();
-            //Imagen
-            $directory = $this->get("upload_directory_mapa");
+            
             $tamanio_maximo = $this->get("max_file_size");
             $formatos_permitidos = $this->get("allow_file_format");
             $uploadedFiles = $request->getUploadedFiles();
-            $filename = "";
+            
+            //Mapa
+            $directory_mapa = $this->get("upload_directory_mapa");
+            $filename_mapa = "";
             if(isset($uploadedFiles["imgmapa"])) {
                 $uploadedFile = $uploadedFiles["imgmapa"];
                 if($uploadedFile->getError() === UPLOAD_ERR_OK) {
                     if($uploadedFile->getSize() <= $tamanio_maximo) {
                         if(in_array($uploadedFile->getClientMediaType(), $formatos_permitidos)) {
-                            $filename = moveUploadedFile($directory, $uploadedFile, 1, $args["id"]);
+                            $filename_mapa = moveUploadedFile($directory_mapa, $uploadedFile, 1, $args["id"]);
                         }
                     }
                 }
             }
             $eliminar_viejo_mapa = false;
             $nombre_viejo_mapa = $parsedBody["mapa"];
-            if($filename == "") {
-                $filename = $nombre_viejo_mapa;
+            if($filename_mapa == "") {
+                $filename_mapa = $nombre_viejo_mapa;
             } else {
                 $eliminar_viejo_mapa = true;
             }
+
+            //Foto
+            $directory_foto = $this->get("upload_directory_zonas");
+            $filename_foto = "";
+            if(isset($uploadedFiles["imgfoto"])) {
+                $uploadedFile = $uploadedFiles["imgfoto"];
+                if($uploadedFile->getError() === UPLOAD_ERR_OK) {
+                    if($uploadedFile->getSize() <= $tamanio_maximo) {
+                        if(in_array($uploadedFile->getClientMediaType(), $formatos_permitidos)) {
+                            $filename_foto = moveUploadedFile($directory_foto, $uploadedFile, 1, $args["id"]);
+                        }
+                    }
+                }
+            }
+            $eliminar_vieja_foto = false;
+            $nombre_vieja_foto = $parsedBody["foto"];
+            if($filename_foto == "") {
+                $filename_foto = $nombre_vieja_foto;
+            } else {
+                $eliminar_vieja_foto = true;
+            }
+
+            //Mini (Mini Mapa San Luis)
+            $directory_mini = $this->get("upload_directory_mapa") . "/mini";
+            $filename_mini = "";
+            if(isset($uploadedFiles["imgmini"])) {
+                $uploadedFile = $uploadedFiles["imgmini"];
+                if($uploadedFile->getError() === UPLOAD_ERR_OK) {
+                    if($uploadedFile->getSize() <= $tamanio_maximo) {
+                        if(in_array($uploadedFile->getClientMediaType(), $formatos_permitidos)) {
+                            $filename_mini = moveUploadedFile($directory_mini, $uploadedFile, 1, $args["id"]);
+                        }
+                    }
+                }
+            }
+            $eliminar_viejo_mini = false;
+            $nombre_viejo_mini = $parsedBody["mini"];
+            if($filename_mini == "") {
+                $filename_mini = $nombre_viejo_mini;
+            } else {
+                $eliminar_viejo_mini = true;
+            }
+
             $data = array(
                 "nombre" => $parsedBody["nombre"],
                 "descripcion" => $parsedBody["descripcion"],
-                "mapa" => $filename,
+                "mapa" => $filename_mapa,
+                "foto" => $filename_foto,
+                "mini" => $filename_mini,
+                "color" => $parsedBody["color"],
                 "activo" => $parsedBody["activo"]
             );
             $respuesta = dbPatchWithData("zonas", $args["id"], $data);
             if($respuesta->err == false) {
                 //Eliminar la vieja imagen del Mapa
                 if(($eliminar_viejo_mapa == true) && ($nombre_viejo_mapa <> "default.jpg")) {
-                    @unlink($directory . DIRECTORY_SEPARATOR . $nombre_viejo_mapa);
+                    @unlink($directory_mapa . DIRECTORY_SEPARATOR . $nombre_viejo_mapa);
                     /*
                     $resperr = new stdClass();
                     $resperr->err = true;
@@ -148,7 +209,17 @@
                         ->write(json_encode($resperr, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
                     */
                 }
-                $respuesta->mapa = $filename;
+                $respuesta->mapa = $filename_mapa;
+                //Eliminar la vieja foto
+                if(($eliminar_vieja_foto == true) && ($nombre_vieja_foto <> "default.jpg")) {
+                    @unlink($directory_foto . DIRECTORY_SEPARATOR . $nombre_vieja_foto);
+                }
+                $respuesta->foto = $filename_foto;
+                //Eliminar la vieja foto de Mini Mapa san Luis
+                if(($eliminar_viejo_mini == true) && ($nombre_viejo_mini <> "default.jpg")) {
+                    @unlink($directory_mini . DIRECTORY_SEPARATOR . $nombre_viejo_mini);
+                }
+                $respuesta->mini = $filename_mini;
                 return $response
                     ->withStatus(200) //Ok
                     ->withHeader("Content-Type", "application/json")
