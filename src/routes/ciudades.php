@@ -35,6 +35,19 @@
         $xSQL .= " WHERE ciudades.id = " . $args["id"];
         $xSQL .= " ORDER BY ciudades.nombre";
         $respuesta = dbGet($xSQL);
+        $color = "000000";
+        //Para obtener el color (saber si la localidad es parte de alguna zona)
+        $xSQL = "SELECT idzona FROM zonas_ciudades WHERE idciudad = " . $args["id"];
+        $resp_zona_ciudades = dbGet($xSQL);
+        if($resp_zona_ciudades->data["count"] > 0) {
+            //Obtener el color de la zona
+            $xSQL = "SELECT color FROM zonas WHERE id = " . $resp_zona_ciudades->data["registros"][0]->idzona;
+            $resp_zona_color = dbGet($xSQL);
+            if($resp_zona_color->data["count"] > 0) {
+                $color = $resp_zona_color->data["registros"][0]->color;
+            }
+        }
+        $respuesta->data["registros"][0]->color = $color;
         return $response
             ->withStatus(200)
             ->withHeader("Content-Type", "application/json")
@@ -50,7 +63,7 @@
             ->write(json_encode($respuesta, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
     });
 
-    //Agregar una cuidad
+    //Agregar una Cuidad
     $app->post("/ciudad", function (Request $request, Response $response, array $args) {
         $reglas = array(
             "idprovincia" => array(
@@ -84,8 +97,71 @@
                 "numeric" => true,
                 "tag" => "Longitud"
             ),
+            "latitudg" => array(
+                "max" => 25,
+                "tag" => "Latitud (º Grados)"
+            ),
+            "longitudg" => array(
+                "max" => 25,
+                "tag" => "Longitud (º Grados)"
+            ),
             "descripcion" => array(
                 "tag" => "Descripción"
+            ),
+            "video" => array(
+                "max" => 250,
+                "tag" => "URL Video"
+            ),
+            "mdireccion" => array(
+                "max" => 50,
+                "tag" => "Municipio Dirección"
+            ),
+            "mtelefono" => array(
+                "max" => 10,
+                "tag" => "Municipio Teléfono"
+            ),
+            "minterno" => array(
+                "max" => 5,
+                "tag" => "Municipio Interno"
+            ),
+            "mweb" => array(
+                "max" => 100,
+                "tag" => "Municipio Web"
+            ),
+            "mmail" => array(
+                "max" => 100,
+                "tag" => "Municipio Email"
+            ),
+            "mresponsable" => array(
+                "max" => 100,
+                "tag" => "Municipio Responsable"
+            ),
+            "odireccion" => array(
+                "max" => 50,
+                "tag" => "Oficina de Turísmo Dirección"
+            ),
+            "otelefono" => array(
+                "max" => 10,
+                "tag" => "Oficina de Turísmo Teléfono"
+            ),
+            "ointerno" => array(
+                "max" => 5,
+                "tag" => "Oficina de Turísmo Interno"
+            ),
+            "oweb" => array(
+                "max" => 100,
+                "tag" => "Oficina de Turísmo Web"
+            ),
+            "omail" => array(
+                "max" => 100,
+                "tag" => "Oficina de Turísmo Email"
+            ),
+            "oresponsable" => array(
+                "max" => 100,
+                "tag" => "Oficina de Turísmo Responsable"
+            ),
+            "fiestas" => array(
+                "tag" => "Festejos/Eventos"
             )
         );
         $validar = new Validate();
@@ -99,7 +175,23 @@
                 "cp" => $parsedBody["cp"],
                 "latitud" => $parsedBody["latitud"],
                 "longitud" => $parsedBody["longitud"],
-                "descripcion" => $parsedBody["descripcion"]
+                "latitudg" => $parsedBody["latitudg"],
+                "longitudg" => $parsedBody["longitudg"],
+                "descripcion" => $parsedBody["descripcion"],
+                "video" => $parsedBody["video"],
+                "mdireccion" => $parsedBody["mdireccion"],
+                "mtelefono" => $parsedBody["mtelefono"],
+                "minterno" => $parsedBody["minterno"],
+                "mweb" => $parsedBody["mweb"],
+                "mmail" => $parsedBody["mmail"],
+                "mresponsable" => $parsedBody["mresponsable"],
+                "odireccion" => $parsedBody["odireccion"],
+                "otelefono" => $parsedBody["otelefono"],
+                "ointerno" => $parsedBody["ointerno"],
+                "oweb" => $parsedBody["oweb"],
+                "omail" => $parsedBody["omail"],
+                "oresponsable" => $parsedBody["oresponsable"],
+                "fiestas" => $parsedBody["fiestas"]
             );
             //Verificaciones!?
             //????
@@ -156,8 +248,71 @@
                 "numeric" => true,
                 "tag" => "Longitud"
             ),
+            "latitudg" => array(
+                "max" => 25,
+                "tag" => "Latitud (º Grados)"
+            ),
+            "longitudg" => array(
+                "max" => 25,
+                "tag" => "Longitud (º Grados)"
+            ),
             "descripcion" => array(
                 "tag" => "Descripción"
+            ),
+            "video" => array(
+                "max" => 250,
+                "tag" => "URL Video"
+            ),
+            "mdireccion" => array(
+                "max" => 50,
+                "tag" => "Municipio Dirección"
+            ),
+            "mtelefono" => array(
+                "max" => 10,
+                "tag" => "Municipio Teléfono"
+            ),
+            "minterno" => array(
+                "max" => 5,
+                "tag" => "Municipio Interno"
+            ),
+            "mweb" => array(
+                "max" => 100,
+                "tag" => "Municipio Web"
+            ),
+            "mmail" => array(
+                "max" => 100,
+                "tag" => "Municipio Email"
+            ),
+            "mresponsable" => array(
+                "max" => 100,
+                "tag" => "Municipio Responsable"
+            ),
+            "odireccion" => array(
+                "max" => 50,
+                "tag" => "Oficina de Turísmo Dirección"
+            ),
+            "otelefono" => array(
+                "max" => 10,
+                "tag" => "Oficina de Turísmo Teléfono"
+            ),
+            "ointerno" => array(
+                "max" => 5,
+                "tag" => "Oficina de Turísmo Interno"
+            ),
+            "oweb" => array(
+                "max" => 100,
+                "tag" => "Oficina de Turísmo Web"
+            ),
+            "omail" => array(
+                "max" => 100,
+                "tag" => "Oficina de Turísmo Email"
+            ),
+            "oresponsable" => array(
+                "max" => 100,
+                "tag" => "Oficina de Turísmo Responsable"
+            ),
+            "fiestas" => array(
+                "tag" => "Festejos/Eventos"
             )
         );
         $validar = new Validate();
@@ -171,7 +326,23 @@
                 "cp" => $parsedBody["cp"],
                 "latitud" => $parsedBody["latitud"],
                 "longitud" => $parsedBody["longitud"],
-                "descripcion" => $parsedBody["descripcion"]
+                "latitudg" => $parsedBody["latitudg"],
+                "longitudg" => $parsedBody["longitudg"],
+                "descripcion" => $parsedBody["descripcion"],
+                "video" => $parsedBody["video"],
+                "mdireccion" => $parsedBody["mdireccion"],
+                "mtelefono" => $parsedBody["mtelefono"],
+                "minterno" => $parsedBody["minterno"],
+                "mweb" => $parsedBody["mweb"],
+                "mmail" => $parsedBody["mmail"],
+                "mresponsable" => $parsedBody["mresponsable"],
+                "odireccion" => $parsedBody["odireccion"],
+                "otelefono" => $parsedBody["otelefono"],
+                "ointerno" => $parsedBody["ointerno"],
+                "oweb" => $parsedBody["oweb"],
+                "omail" => $parsedBody["omail"],
+                "oresponsable" => $parsedBody["oresponsable"],
+                "fiestas" => $parsedBody["fiestas"]
             );
             $respuesta = dbPatchWithData("ciudades", $args["id"], $data);
             return $response

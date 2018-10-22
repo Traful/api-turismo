@@ -26,6 +26,114 @@
 
     //[POST]
 
+    //Agregar un Atractivo
+    $app->post("/atractivo/new/{id:[0-9]+}", function (Request $request, Response $response, array $args) {
+        $reglas = array(
+            "idlocalidad" => array(
+                "mayorcero" => true, 
+                "numeric" => true,
+                "tag" => "Identificador de Localidad"
+            ),
+            "tipo" => array(
+                "max" => 30, 
+                "tag" => "Tipo de Atractivo"
+            ),
+            "nombre" => array(
+                "min" => 5,
+                "max" => 50, 
+                "tag" => "Nombre del Atractivo"
+            ),
+            "domicilio" => array(
+                "max" => 50, 
+                "tag" => "Domicilio del Atractivo"
+            ),
+            "descripcion" => array(
+                "tag" => "Descripcion del Atractivo"
+            ),
+            "latitud" => array(
+                "numeric" => true,
+                "tag" => "Latitud"
+            ),
+            "longitud" => array(
+                "numeric" => true,
+                "tag" => "Longitud"
+            ),
+            "latitudg" => array(
+                "max" => 25,
+                "tag" => "Latitud º"
+            ),
+            "longitudg" => array(
+                "max" => 25,
+                "tag" => "Longitud º"
+            ),
+            "telefono" => array(
+                "max" => 25,
+                "tag" => "Teléfono"
+            ),
+            "mail" => array(
+                "max" => 100,
+                "tag" => "Email"
+            ),
+            "web" => array(
+                "max" => 100,
+                "tag" => "Web"
+            ),
+            "costo" => array(
+                "numeric" => true,
+                "tag" => "Costo"
+            ),
+            "lunes" => array(
+                "max" => 100,
+                "tag" => "Horario Lunes"
+            ),
+            "martes" => array(
+                "max" => 100,
+                "tag" => "Horario Martes"
+            ),
+            "miercoles" => array(
+                "max" => 100,
+                "tag" => "Horario Miércoles"
+            ),
+            "jueves" => array(
+                "max" => 100,
+                "tag" => "Horario Jueves"
+            ),
+            "viernes" => array(
+                "max" => 100,
+                "tag" => "Horario Viernes"
+            ),
+            "sabado" => array(
+                "max" => 100,
+                "tag" => "Horario Sábado"
+            ),
+            "domingo" => array(
+                "max" => 100,
+                "tag" => "Horario Domingo"
+            ),
+            "imperdible" => array(
+                "tag" => "Imperdible"
+            )
+        );
+        $validar = new Validate();
+        if($validar->validar($request->getParsedBody(), $reglas)) {
+            $parsedBody = $request->getParsedBody();
+            $respuesta = dbPostWithData("atractivos", $parsedBody);
+            return $response
+                ->withStatus(201) //Created
+                ->withHeader("Content-Type", "application/json")
+                ->write(json_encode($respuesta, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+        } else {
+            $resperr = new stdClass();
+            $resperr->err = true;
+            $resperr->errMsg = "Hay errores en los datos suministrados";
+            $resperr->errMsgs = $validar->errors();
+            return $response
+                ->withStatus(409) //Conflicto
+                ->withHeader("Content-Type", "application/json")
+                ->write(json_encode($resperr, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+        }
+    });
+
     //Agregar una imagen a un Atractivo en particular
     $app->post("/atractivo/{id:[0-9]+}/imagen", function (Request $request, Response $response, array $args) {
         $resperr = new stdClass();
@@ -71,6 +179,122 @@
             ->withStatus(409) //Conflicto
             ->withHeader("Content-Type", "application/json")
             ->write(json_encode($resperr, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+    });
+
+    //[PATCH]
+    
+    //Actualizar los datos de un atractivo
+    $app->patch("/atractivo/{id:[0-9]+}", function (Request $request, Response $response, array $args) {
+        $reglas = array(
+            "id" => array(
+                "mayorcero" => true, 
+                "numeric" => true,
+                "tag" => "Identificador de Atractivo"
+            ),
+            "idlocalidad" => array(
+                "mayorcero" => true, 
+                "numeric" => true,
+                "tag" => "Identificador de Localidad"
+            ),
+            "tipo" => array(
+                "max" => 30, 
+                "tag" => "Tipo de Atractivo"
+            ),
+            "nombre" => array(
+                "min" => 5,
+                "max" => 50, 
+                "tag" => "Nombre del Atractivo"
+            ),
+            "domicilio" => array(
+                "max" => 50, 
+                "tag" => "Domicilio del Atractivo"
+            ),
+            "descripcion" => array(
+                "tag" => "Descripcion del Atractivo"
+            ),
+            "latitud" => array(
+                "numeric" => true,
+                "tag" => "Latitud"
+            ),
+            "longitud" => array(
+                "numeric" => true,
+                "tag" => "Longitud"
+            ),
+            "latitudg" => array(
+                "max" => 25,
+                "tag" => "Latitud º"
+            ),
+            "longitudg" => array(
+                "max" => 25,
+                "tag" => "Longitud º"
+            ),
+            "telefono" => array(
+                "max" => 25,
+                "tag" => "Teléfono"
+            ),
+            "mail" => array(
+                "max" => 100,
+                "tag" => "Email"
+            ),
+            "web" => array(
+                "max" => 100,
+                "tag" => "Web"
+            ),
+            "costo" => array(
+                "numeric" => true,
+                "tag" => "Costo"
+            ),
+            "lunes" => array(
+                "max" => 100,
+                "tag" => "Horario Lunes"
+            ),
+            "martes" => array(
+                "max" => 100,
+                "tag" => "Horario Martes"
+            ),
+            "miercoles" => array(
+                "max" => 100,
+                "tag" => "Horario Miércoles"
+            ),
+            "jueves" => array(
+                "max" => 100,
+                "tag" => "Horario Jueves"
+            ),
+            "viernes" => array(
+                "max" => 100,
+                "tag" => "Horario Viernes"
+            ),
+            "sabado" => array(
+                "max" => 100,
+                "tag" => "Horario Sábado"
+            ),
+            "domingo" => array(
+                "max" => 100,
+                "tag" => "Horario Domingo"
+            ),
+            "imperdible" => array(
+                "tag" => "Imperdible"
+            )
+        );
+        $validar = new Validate();
+        $parsedBody = $request->getParsedBody();
+        if($validar->validar($parsedBody, $reglas)) {
+            //$respuesta = dbPatchWithData("atractivos", $args["id"], $parsedBody);
+            $respuesta = dbPatchWithData("atractivos", $parsedBody["id"], $parsedBody);
+            return $response
+                ->withStatus(200) //Ok
+                ->withHeader("Content-Type", "application/json")
+                ->write(json_encode($respuesta, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+        } else {
+            $resperr = new stdClass();
+            $resperr->err = true;
+            $resperr->errMsg = "Hay errores en los datos suministrados";
+            $resperr->errMsgs = $validar->errors();
+            return $response
+                ->withStatus(409) //Conflicto
+                ->withHeader("Content-Type", "application/json")
+                ->write(json_encode($resperr, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+        }
     });
 
     //[DELETE]
