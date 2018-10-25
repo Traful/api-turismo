@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8a2f2f0e96dc4fa19ffa66cbc0fe17dc",
+    "content-hash": "765ad6129d80c5f07e18e7b4d9edfa12",
     "packages": [
         {
             "name": "container-interop/container-interop",
@@ -456,6 +456,58 @@
                 "qrcode"
             ],
             "time": "2018-02-24T11:48:20+00:00"
+        },
+        {
+            "name": "tuupola/base62",
+            "version": "0.11.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/tuupola/base62.git",
+                "reference": "6762ca1271f42fdc636b309589d8b25668e8ade9"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/tuupola/base62/zipball/6762ca1271f42fdc636b309589d8b25668e8ade9",
+                "reference": "6762ca1271f42fdc636b309589d8b25668e8ade9",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^5.6 || ^7.0"
+            },
+            "require-dev": {
+                "overtrue/phplint": "^0.2.4",
+                "paragonie/random_compat": "^2.0",
+                "phpbench/phpbench": "^0.13.0",
+                "phpunit/phpunit": "^4.8|^5.5|^6.5",
+                "squizlabs/php_codesniffer": "^2.5"
+            },
+            "suggest": {
+                "ext-gmp": "This extension will generate the encoded string faster."
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Tuupola\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Mika Tuupola",
+                    "email": "tuupola@appelsiini.net",
+                    "homepage": "http://www.appelsiini.net/",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Base62 encoder and decoder for arbitrary data",
+            "homepage": "https://github.com/tuupola/base62",
+            "keywords": [
+                "base62"
+            ],
+            "time": "2018-09-11T17:12:39+00:00"
         },
         {
             "name": "vlucas/phpdotenv",

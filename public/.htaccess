@@ -10,14 +10,16 @@ RewriteEngine on
 #RewriteCond %{HTTP:Authorization} ^(.)
 #RewriteRule . - [e=HTTP_AUTHORIZATION:%1]
 
-#Funciona con Postman pero no desde la Web (Chrome)
-RewriteRule .* - [env=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
-
 #Probar
 #Header add Access-Control-Allow-Origin "*"
 #Header add Access-Control-Allow-Headers "origin, x-requested-with, content-type"
 #Header add Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
 #Header add Access-Control-Allow-Credentials "true"
+
+SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+
+#Funciona con Postman pero no desde la Web (Chrome)
+#RewriteRule .* - [env=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
 #Ruteo
 RewriteCond %{REQUEST_FILENAME} !-d

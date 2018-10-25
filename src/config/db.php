@@ -4,16 +4,16 @@
         private $db_host = "localhost";
         
         //Online
+        /*
         private $db_name = "u516024333_tur";
         private $db_user_name = "u516024333_tur";
         private $db_user_password = "turismosl";
+        */
 
         //Local
-        /*
         private $db_name = "turismo";
         private $db_user_name = "root";
         private $db_user_password = "";
-        */
         
         //Class Settings
         private $conn = null;

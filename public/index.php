@@ -16,7 +16,9 @@
     date_default_timezone_set("America/Argentina/San_Luis");
     $configuration = [
         'settings' => [
-            'displayErrorDetails' => true
+            'displayErrorDetails' => true,
+            'determineRouteBeforeAppMiddleware' => true,
+            'debug' => true
         ],
     ];
     $c = new \Slim\Container($configuration);
@@ -60,74 +62,75 @@
         return $filename;
     }
 
-    //Cors
+
+    //Cors y Auth
     $app->options('/{routes:.+}', function ($request, $response, $args) {
         return $response;
     });
+    
+    $app->add(function ($request, $response, $next) {
+        if($request->isOptions()) {
+            return $response
+                ->withHeader('Access-Control-Allow-Origin', '*')
+                ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
+                //->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS')
+                ->withStatus(200);
+        }
 
-    /*
-    header ("Access-Control-Allow-Origin: *");
-    header ("Access-Control-Expose-Headers: Content-Length, X-JSON");
-    header ("Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS");
-    header ("Access-Control-Allow-Headers: *");
-    */
-    $app->add(function($req, $res, $next) {
-        $response = $next($req, $res);
-        return $response
-            /*
-                ->withHeader("Access-Control-Allow-Credentials", "true");
-            */
+        $response = $response
             ->withHeader('Access-Control-Allow-Origin', '*')
             ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
-            ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-    });
-
-    //.htaccess
-    //RewriteRule .* - [env=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
-    //SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
-    //Auth
-    /*
-    $app->add(function($req, $res, $next) {
-        $path = $req->getUri()->getPath();
+            //->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+            ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH');
+        
+        // Sin Token /user/login (Logueo de Usuario)
+        $path = $request->getUri()->getPath();
         if($path === "/user/login") {
-            $res = $next($req, $res);
-            return $res;
+            return $next($request, $response);
         } else {
-            //See $request->getServerParam('HTTP_NOT_EXIST', 'default_value_here');
-            if($req->hasHeader("HTTP_AUTHORIZATION")) {
-                $token = null;
-                try {
-                    $authorization = $req->getHeader("HTTP_AUTHORIZATION")[0];
-                    //$authorization = "JpYXQiOjE1MzQ2NTg0NzMsImV4cCI6MTUzNDY4NzI3MywianRpIjoiPz8_Iiwic3ViIjoiPz8_Iiwic2NvcGUiOnsiaWQiOiIxIiwicGVybWlzb3MiOnsiR0VUIjoiMSIsIlBPU1QiOiIxIiwiUFVUIjoiMSIsIlBBVENIIjoiMSIsIkRFTEVURSI6IjEifSwiaWR0aXBvIjoiMiJ9fQ.z3Y9OImDjgdiiBD9dfs_QHC_RTy0rJBCYaxNlEEi3SE";
-                    //$token = JWT::decode($authorization, getenv("JWT_SECRET_KEY"), array("HS256"));
-                } catch(\Exception $e) {
-                    return $res
-                        ->withStatus(401)
-                        ->withHeader("Content-Type", "application/json")
-                        ->write(json_encode(array("Error" => "Unauthorized (" . $e->getMessage() . ") Auth: " . $authorization), JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+            /*
+            $auth = false;
+            if($request->hasHeader('HTTP_AUTHORIZATION') && (count($request->getHeader('HTTP_AUTHORIZATION')) > 0)) {
+                $auth_token = trim($request->getHeader('HTTP_AUTHORIZATION')[0]);
+                if(strpos(strtolower($auth_token), 'bearer ') !== false) {
+                    $auth_token = explode(" ", $auth_token);
+                    if(count($auth_token) > 1) {
+                        $auth_token = $auth_token[1];
+                        try {
+                            $token = JWT::decode($auth_token, getenv("JWT_SECRET_KEY"), array("HS256"));
+                            $auth = true;
+                        } catch(\Exception $e) {
+                            return $response
+                                ->withStatus(401)
+                                ->withHeader("Content-Type", "application/json")
+                                ->write(json_encode(array("Error" => "Unauthorized (" . $e->getMessage() . ")"), JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+                        }
+                    }
                 }
-                $res = $next($req, $res);
-                return $res;
+            }
+            */
+            $auth = true; //Borrar esta linea y descomentar el código anterior
+            if($auth === true) {
+                return $next($request, $response);
             } else {
-                return $res
+                return $response
                     ->withStatus(401)
                     ->withHeader("Content-Type", "application/json")
                     ->write(json_encode(array("Error" => "Unauthorized"), JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
             }
         }
     });
-    */
 
+    //Welcome
     $app->get('/', function (Request $request, Response $response, array $args) {
-        $response->getBody()->write("Welcome");
-        return $response;
-    });
-
-    $app->get('/hello/{name}', function (Request $request, Response $response, array $args) {
-        $name = $args['name'];
-        $response->getBody()->write("Hello, $name");
-
-        return $response;
+        $data_api = array(
+            "name" => "api-turismo",
+            "version" => "1.0.0"
+        );
+        return $response
+            ->withStatus(200)
+            ->withHeader("Content-Type", "application/json")
+            ->write(json_encode($data_api, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
     });
 
     //Usuarios
@@ -160,6 +163,12 @@
     require "../src/routes/zonas.php";
     //Atractivos
     require "../src/routes/atractivos.php";
+
+    //Cors
+    $app->map(['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], '/{routes:.+}', function($req, $res) {
+        $handler = $this->notFoundHandler; // handle using the default Slim page not found handler
+        return $handler($req, $res);
+    });
 
     $app->run();
 ?>
