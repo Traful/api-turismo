@@ -4,7 +4,7 @@
 
     //Ciudades
 
-    //Todas los Atractivos de una Ciudad (Loclidad)
+    //Todos los Atractivos de una Ciudad (Loclidad)
     $app->get("/ciudad/{id:[0-9]+}/atractivos", function (Request $request, Response $response, array $args) {
         $xSQL = "SELECT * FROM atractivos";
         $xSQL .= " WHERE atractivos.idlocalidad = " . $args["id"];
@@ -35,7 +35,7 @@
         $xSQL .= " WHERE ciudades.id = " . $args["id"];
         $xSQL .= " ORDER BY ciudades.nombre";
         $respuesta = dbGet($xSQL);
-        $color = "000000";
+        $color = "722789"; //Violeta Oscuro
         //Para obtener el color (saber si la localidad es parte de alguna zona)
         $xSQL = "SELECT idzona FROM zonas_ciudades WHERE idciudad = " . $args["id"];
         $resp_zona_ciudades = dbGet($xSQL);
@@ -48,6 +48,39 @@
             }
         }
         $respuesta->data["registros"][0]->color = $color;
+        //Obtener imágenes al azar de los Atractivos
+        $buffer_imagenes = array();
+        $xSQL = "SELECT id, nombre from atractivos WHERE idlocalidad = " . $args["id"];
+        $atractivos = dbGet($xSQL);
+        if(count($atractivos->data["registros"]) > 0) {
+            for($i=0; $i < count($atractivos->data["registros"]); $i++) {
+                $nombre_atractivo = $atractivos->data["registros"][$i]->nombre;
+                //Selecciono una imagen de ese atractivo al azar
+                $xSQL = "SELECT imagen FROM atractivo_imgs WHERE idatractivo = " . $atractivos->data["registros"][$i]->id;
+                $imagenes = dbGet($xSQL);
+                if(count($imagenes->data["registros"]) > 0) {
+                    //$nro = random_int(0, (count($imagenes->data["registros"]) - 1)); //Solo PHP 7^ 
+                    $nro = intval(rand(0, (count($imagenes->data["registros"]) - 1)));
+                    array_push($buffer_imagenes, array(
+                        "nombre_atractivo" => $nombre_atractivo,
+                        "imagen" => $imagenes->data["registros"][$nro]->imagen,
+                    ));
+                } else { //El Atractivo no tiene fotos
+                    array_push($buffer_imagenes, array(
+                        "nombre_atractivo" => $nombre_atractivo,
+                        "imagen" => "default.jpg",
+                    ));
+                }
+            }
+        } else {
+            //No tiene atractivos la Localidad
+            array_push($buffer_imagenes, array(
+                "nombre_atractivo" => "Sin Atractivos",
+                "imagen" => "default.jpg",
+            ));
+        }
+        $respuesta->data["registros"][0]->imagenes = $buffer_imagenes;
+
         return $response
             ->withStatus(200)
             ->withHeader("Content-Type", "application/json")

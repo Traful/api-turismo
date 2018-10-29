@@ -8,6 +8,7 @@
     $app->get("/atractivo/{id:[0-9]+}", function (Request $request, Response $response, array $args) {
         $xSQL = "SELECT * FROM atractivos WHERE id = " . $args["id"];
         $respuesta = dbGet($xSQL);
+        //Color?
         return $response
             ->withStatus(200)
             ->withHeader("Content-Type", "application/json")
