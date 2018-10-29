@@ -2,7 +2,7 @@
     use \Psr\Http\Message\ServerRequestInterface as Request;
     use \Psr\Http\Message\ResponseInterface as Response;
     use Firebase\JWT\JWT;
-    use Tuupola\Base62;
+    //use Tuupola\Base62;
     
     $app->post("/user/login", function (Request $request, Response $response, array $args) {
         $reglas = array(
@@ -33,7 +33,8 @@
                     $payload = [
                         "iat" => $now->getTimeStamp(),
                         "exp" => $future->getTimeStamp(),
-                        "jti" => (new Base62)->encode(random_bytes(16)),
+                        //"jti" => (new Base62)->encode(random_bytes(16)), //No funciona con la versión PHP del servidor de Hostinger (5.6.38)
+                        "jti" => "???",
                         //"sub" => $server["PHP_AUTH_USER"],
                         "sub" => "???",
                         "scope" => array(
@@ -72,7 +73,7 @@
                         "expires" => $future->getTimeStamp()
                     );
                     return $response
-                        ->withStatus(409) //Conflicto
+                        ->withStatus(200) //Ok
                         ->withHeader("Content-Type", "application/json")
                         ->write(json_encode($resperr, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
                 } else {

@@ -45,6 +45,63 @@
             ->write(json_encode($respuesta, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
     });
 
+    //Para armar el carousel de una zona y la galería de imágenes con link a cada localidad
+    $app->get("/zona/{idzona:[0-9]+}/galeria", function (Request $request, Response $response, array $args) {
+        $buffer = new stdClass();
+        $buffer->imagenes = array();
+        //Ciudades de la Zona
+        $xSQL = "SELECT zonas_ciudades.idciudad, ciudades.nombre as ciudad FROM zonas_ciudades";
+        $xSQL .= " INNER JOIN ciudades ON zonas_ciudades.idciudad = ciudades.id";
+        $xSQL .= " WHERE zonas_ciudades.idzona = " . $args["idzona"];
+        $xSQL .= " ORDER BY ciudades.nombre";
+        $ciudades_zona = dbGet($xSQL);
+        for($i=0; $i < count($ciudades_zona->data["registros"]); $i++) {
+            $id_ciudad = $ciudades_zona->data["registros"][$i]->idciudad;
+            $nombre_ciudad = $ciudades_zona->data["registros"][$i]->ciudad;
+            //id de los Atractivos de la Ciudad
+            $xSQL = "SELECT id, nombre from atractivos WHERE idlocalidad = " . $id_ciudad;
+            $atractivos = dbGet($xSQL);
+            if(count($atractivos->data["registros"]) > 0) {
+                //Selecciono un Atractivo al Azar
+                $nro_atractivo = intval(rand(0, (count($atractivos->data["registros"]) - 1)));
+                $nombre_atractivo = $atractivos->data["registros"][$nro_atractivo]->nombre;
+                //Selecciono una imagen de ese atractivo al azar
+                $xSQL = "SELECT imagen FROM atractivo_imgs WHERE idatractivo = " . $atractivos->data["registros"][$nro_atractivo]->id;
+                $imagenes = dbGet($xSQL);
+                if(count($imagenes->data["registros"]) > 0) {
+                    //$nro = random_int(0, (count($imagenes->data["registros"]) - 1)); //Solo PHP 7^ 
+                    $nro = intval(rand(0, (count($imagenes->data["registros"]) - 1))); //Va el -1??
+                    array_push($buffer->imagenes, array(
+                        "idlocalidad" => $id_ciudad,
+                        "nombre_localidad" => $nombre_ciudad,
+                        "nombre_atractivo" => $nombre_atractivo,
+                        "imagen" => $imagenes->data["registros"][$nro]->imagen,
+                    ));
+                } else { //El Atractivo no tiene fotos
+                    array_push($buffer->imagenes, array(
+                        "idlocalidad" => $id_ciudad,
+                        "nombre_localidad" => $nombre_ciudad,
+                        "nombre_atractivo" => $nombre_atractivo,
+                        "imagen" => "default.jpg",
+                    ));
+                }
+            } else {
+                //No tiene atractivos la Localidad
+                array_push($buffer->imagenes, array(
+                    "idlocalidad" => $id_ciudad,
+                    "nombre_localidad" => $nombre_ciudad,
+                    "nombre_atractivo" => "Sin Atractivos",
+                    "imagen" => "default.jpg",
+                ));
+            }
+        }
+
+        return $response
+            ->withStatus(200)
+            ->withHeader("Content-Type", "application/json")
+            ->write(json_encode($buffer, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+    });
+
     //[POST]
 
     //Agregar una nueva Zona
