@@ -190,14 +190,14 @@
     }
 
     
-    function dbDelete($table, $id) {
+    function dbDelete($table, $value, $field = "id", $compare = "=") {
         $respuesta = new stdClass();
         $respuesta->err = false;
         $respuesta->errMsg = "";
         $db = new DB();
         $db->connect();
         if(!$db->error()) {
-            $xSQL = "DELETE FROM " . $table . " WHERE id = " . $id;
+            $xSQL = "DELETE FROM " . $table . " WHERE " . $field . " " . $compare . " " . $value;
             if($db->consultar($xSQL)->error()) {
                 $respuesta->err = true;
                 $respuesta->errMsg = $db->error_msg();

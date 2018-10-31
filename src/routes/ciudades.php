@@ -16,6 +16,44 @@
             ->write(json_encode($respuesta, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
     });
 
+    //Todos los Atractivos de una Ciudad (Loclidad) + Imágenes
+    $app->get("/ciudad/{id:[0-9]+}/atractivos/imagenes", function (Request $request, Response $response, array $args) {
+        $xSQL = "SELECT atractivos.*, ciudades.nombre AS localidad FROM atractivos";
+        $xSQL .= " INNER JOIN ciudades ON atractivos.idlocalidad = ciudades.id";
+        $xSQL .= " WHERE atractivos.idlocalidad = " . $args["id"];
+        $xSQL .= " ORDER BY atractivos.nombre";
+        $respuesta = dbGet($xSQL);
+
+        $color = "722789"; //Violeta Oscuro
+        //Para obtener el color (saber si la localidad es parte de alguna zona)
+        $xSQL = "SELECT idzona FROM zonas_ciudades WHERE idciudad = " . $args["id"];
+        $resp_zona_ciudades = dbGet($xSQL);
+        if($resp_zona_ciudades->data["count"] > 0) {
+            //Obtener el color de la zona
+            $xSQL = "SELECT color FROM zonas WHERE id = " . $resp_zona_ciudades->data["registros"][0]->idzona;
+            $resp_zona_color = dbGet($xSQL);
+            if($resp_zona_color->data["count"] > 0) {
+                $color = $resp_zona_color->data["registros"][0]->color;
+            }
+        }
+
+        //Imagenes del Atractivo
+        for($i=0; $i < count($respuesta->data["registros"]); $i++) {
+            $respuesta->data["registros"][$i]->color = $color; //Set de color
+            $xSQL = "SELECT imagen FROM atractivo_imgs WHERE idatractivo = " . $respuesta->data["registros"][$i]->id;
+            $imagenes = dbGet($xSQL);
+            if($imagenes->data["count"] > 0) {
+                $respuesta->data["registros"][$i]->imagenes = $imagenes->data["registros"];
+            } else {
+                $respuesta->data["registros"][$i]->imagenes = [array("imagen" => "default.jpg")];
+            }
+        }
+        return $response
+            ->withStatus(200)
+            ->withHeader("Content-Type", "application/json")
+            ->write(json_encode($respuesta, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+    });
+
     //Todas las Ciudades
     $app->get("/ciudades", function (Request $request, Response $response, array $args) {
         $xSQL = "SELECT ciudades.id, ciudades.nombre, departamentos.nombre as departamento FROM ciudades";

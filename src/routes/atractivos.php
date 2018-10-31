@@ -300,6 +300,30 @@
 
     //[DELETE]
 
+    //Eliminar un atractivo
+    $app->delete("/atractivo/{id:[0-9]+}", function (Request $request, Response $response, array $args) {
+        //Eliminar las imagenes del directorio y los registros de la tabla atractivo_imgs
+        $xSQL = "SELECT id, imagen FROM atractivo_imgs WHERE idatractivo = " . $args["id"];
+        $imagenes = dbGet($xSQL);
+        if($imagenes->data["count"] > 0) {
+            for($i=0; $i < count($imagenes->data["registros"]); $i++) {
+                if($imagenes->data["registros"][$i]->imagen <> "default.jpg") {
+                    $fileX = $imagenes->data["registros"][$i]->imagen;
+                    @unlink($this->get("upload_directory_atractivo") . "\\$fileX");
+                }
+            }
+            dbDelete("atractivo_imgs", $args["id"], "idatractivo");
+        }
+        //Eliminar el registro del Atractivo
+        $respuesta = dbDelete("atractivos", $args["id"]);
+        return $response
+            ->withStatus(200)
+            ->withHeader("Content-Type", "application/json")
+            ->write(json_encode($respuesta, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+    });
+
+
+    //Eliminar una imagen de un Atractivo
     $app->delete("/atractivo/imagen/{id:[0-9]+}", function (Request $request, Response $response, array $args) {
         $archivo = dbGet("SELECT imagen FROM atractivo_imgs WHERE id = " . $args["id"]);
         if($archivo->err == false && $archivo->data["count"] > 0) {
