@@ -80,7 +80,7 @@
                     $resperr = new stdClass();
                     $resperr->err = true;
                     $resperr->errMsg = "Contraseña no válida!";
-                    $resperr->errMsgs = [];
+                    $resperr->errMsgs = ["Contraseña no válida!"];
                     return $response
                         ->withStatus(409) //Conflicto
                         ->withHeader("Content-Type", "application/json")
@@ -90,7 +90,7 @@
                 $resperr = new stdClass();
                 $resperr->err = true;
                 $resperr->errMsg = "Email: " . $email . " no válido!";
-                $resperr->errMsgs = [];
+                $resperr->errMsgs = ["Email: " . $email . " no válido!"];
                 return $response
                     ->withStatus(409) //Conflicto
                     ->withHeader("Content-Type", "application/json")
@@ -106,6 +106,7 @@
                 ->withHeader("Content-Type", "application/json")
                 ->write(json_encode($resperr, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
         }
+        
     });
 
     /*

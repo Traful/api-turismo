@@ -30,6 +30,7 @@
     $container["upload_directory"] = __DIR__ . DIRECTORY_SEPARATOR . "imagenes";
     $container["upload_directory_logo"] = __DIR__ . DIRECTORY_SEPARATOR . "logos";
     $container["upload_directory_atractivo"] = __DIR__ . DIRECTORY_SEPARATOR . "atractivos";
+    $container["upload_directory_novedades"] = __DIR__ . DIRECTORY_SEPARATOR . "recursos" . DIRECTORY_SEPARATOR . "novedades";
 
     //Zonas
     $container["upload_directory_mapa"] = __DIR__ . DIRECTORY_SEPARATOR . "mapas";
@@ -156,12 +157,18 @@
     //Consultas
     require "../src/routes/consultas.php";
 
+    //Oficinas de Turísmo
+    require "../src/routes/oficinas.php";
+
     //Página Web
 
     //Zonas
     require "../src/routes/zonas.php";
     //Atractivos
     require "../src/routes/atractivos.php";
+    //Novedades
+    require "../src/routes/novedades.php";
+
 
     //Cors
     $app->map(['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], '/{routes:.+}', function($req, $res) {

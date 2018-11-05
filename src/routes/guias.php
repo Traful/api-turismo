@@ -71,7 +71,7 @@
             $xSQL = "SELECT imagen FROM galeria";
             $xSQL .= " WHERE idGoG = 1 AND idgaleria = " . $guias->data["registros"][$i]->id;
             $fotos = dbGet($xSQL);
-            $guias->data["registros"][$i]->fotos = $tarifas->data["registros"];
+            $guias->data["registros"][$i]->fotos = $fotos->data["registros"];
         }
         return $response
             ->withStatus(200)

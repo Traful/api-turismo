@@ -207,30 +207,6 @@
                 "max" => 100,
                 "tag" => "Municipio Responsable"
             ),
-            "odireccion" => array(
-                "max" => 50,
-                "tag" => "Oficina de Turísmo Dirección"
-            ),
-            "otelefono" => array(
-                "max" => 10,
-                "tag" => "Oficina de Turísmo Teléfono"
-            ),
-            "ointerno" => array(
-                "max" => 5,
-                "tag" => "Oficina de Turísmo Interno"
-            ),
-            "oweb" => array(
-                "max" => 100,
-                "tag" => "Oficina de Turísmo Web"
-            ),
-            "omail" => array(
-                "max" => 100,
-                "tag" => "Oficina de Turísmo Email"
-            ),
-            "oresponsable" => array(
-                "max" => 100,
-                "tag" => "Oficina de Turísmo Responsable"
-            ),
             "fiestas" => array(
                 "tag" => "Festejos/Eventos"
             )
@@ -256,12 +232,6 @@
                 "mweb" => $parsedBody["mweb"],
                 "mmail" => $parsedBody["mmail"],
                 "mresponsable" => $parsedBody["mresponsable"],
-                "odireccion" => $parsedBody["odireccion"],
-                "otelefono" => $parsedBody["otelefono"],
-                "ointerno" => $parsedBody["ointerno"],
-                "oweb" => $parsedBody["oweb"],
-                "omail" => $parsedBody["omail"],
-                "oresponsable" => $parsedBody["oresponsable"],
                 "fiestas" => $parsedBody["fiestas"]
             );
             //Verificaciones!?
