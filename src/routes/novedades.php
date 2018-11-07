@@ -8,7 +8,17 @@
 
     //Obtener las últimas X Novedades
     $app->get("/novedades/{cantidad:[0-9]+}", function (Request $request, Response $response, array $args) {
-        $xSQL = "SELECT * FROM novedades ORDER BY id DESC LIMIT 0, " . $args["cantidad"];
+        $xSQL = "SELECT * FROM novedades ORDER BY fecha DESC LIMIT 0, " . $args["cantidad"];
+        $respuesta = dbGet($xSQL);
+        return $response
+            ->withStatus(200)
+            ->withHeader("Content-Type", "application/json")
+            ->write(json_encode($respuesta, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+    });
+
+    //Obtener los datos de una determinada Novedades
+    $app->get("/novedad/{id:[0-9]+}", function (Request $request, Response $response, array $args) {
+        $xSQL = "SELECT * FROM novedades WHERE id = " . $args["id"];
         $respuesta = dbGet($xSQL);
         return $response
             ->withStatus(200)
@@ -34,7 +44,7 @@
                 "tag" => "Título"
             ),
             "subtitulo" => array(
-                "max" => 50, 
+                "max" => 75, 
                 "tag" => "Sub Título"
             ),
             "descripcion" => array(
