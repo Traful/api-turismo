@@ -13,6 +13,46 @@
             ->write(json_encode($respuesta, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
     });
 
+    //Obtener todas las Guias (Full)
+    $app->get("/guias/full", function (Request $request, Response $response, array $args) {
+        $xSQL = "SELECT guias.id, guias.idciudad, guias.idtipo, guias.nombre, guias.domicilio, ciudades.caracteristica, guias.telefono, guias.mail, guias.web, guias.latitud, guias.longitud, guias.descripcion, guias.logo, tipos.descripcion AS tipo, valortipcat.descripcion AS valor FROM guias";
+        $xSQL .= " INNER JOIN ciudades ON guias.idciudad = ciudades.id";
+        $xSQL .= " INNER JOIN tipos ON guias.idtipo = tipos.id";
+        $xSQL .= " INNER JOIN valortipcat ON guias.idvalortipcat = valortipcat.id";
+        $xSQL .= " ORDER BY guias.nombre";
+        $guias = dbGet($xSQL);
+        for($i=0; $i < count($guias->data["registros"]); $i++) {
+            //Redes Sociales
+            $xSQL = "SELECT guia_redes.link, redes.nombre, redes.icono FROM guia_redes";
+            $xSQL .= " INNER JOIN redes ON guia_redes.idred = redes.id";
+            $xSQL .= " WHERE guia_redes.idguia = " . $guias->data["registros"][$i]->id;
+            $redes = dbGet($xSQL);
+            $guias->data["registros"][$i]->redes = $redes->data["registros"];
+            //Servicios
+            $xSQL = "SELECT servicios.descripcion, guiaservicios.capacidad FROM guiaservicios";
+            $xSQL .= " INNER JOIN servicios ON guiaservicios.idservicio = servicios.id";
+            $xSQL .= " WHERE guiaservicios.idguia = " . $guias->data["registros"][$i]->id;
+            $servicios = dbGet($xSQL);
+            $guias->data["registros"][$i]->servicios = $servicios->data["registros"];
+            //Tarifas
+            $xSQL = "SELECT guia_tarifas.importe, guia_tarifas.desayuno, tipo_tarifas.descripcion FROM guia_tarifas";
+            $xSQL .= " INNER JOIN tipo_tarifas ON guia_tarifas.idtarifa = tipo_tarifas.id";
+            $xSQL .= " WHERE guia_tarifas.idguia = " . $guias->data["registros"][$i]->id;
+            $xSQL .= " ORDER BY tipo_tarifas.orden";
+            $tarifas = dbGet($xSQL);
+            $guias->data["registros"][$i]->tarifas = $tarifas->data["registros"];
+            //Fotos (galeria)
+            $xSQL = "SELECT imagen FROM galeria";
+            $xSQL .= " WHERE idGoG = 1 AND idgaleria = " . $guias->data["registros"][$i]->id;
+            $fotos = dbGet($xSQL);
+            $guias->data["registros"][$i]->fotos = $fotos->data["registros"];
+        }
+        return $response
+            ->withStatus(200)
+            ->withHeader("Content-Type", "application/json")
+            ->write(json_encode($guias, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+    });
+
     //Obtener las Guias de un determinado Departamento
     $app->get("/guias/departamento/{id:[0-9]+}", function (Request $request, Response $response, array $args) {
         $xSQL = "SELECT guias.id, guias.legajo, guias.nombre, guias.activo FROM guias";
@@ -41,7 +81,8 @@
 
     //Obtener las Guias de una determinada Ciudad (Full)
     $app->get("/guias/ciudad/{id:[0-9]+}/full", function (Request $request, Response $response, array $args) {
-        $xSQL = "SELECT guias.id, guias.nombre, guias.domicilio, guias.telefono, guias.mail, guias.web, guias.latitud, guias.longitud, guias.descripcion, guias.logo, tipos.descripcion AS tipo, valortipcat.descripcion AS valor FROM guias";
+        $xSQL = "SELECT guias.id, guias.nombre, guias.domicilio, ciudades.caracteristica, guias.telefono, guias.mail, guias.web, guias.latitud, guias.longitud, guias.descripcion, guias.logo, tipos.descripcion AS tipo, valortipcat.descripcion AS valor FROM guias";
+        $xSQL .= " INNER JOIN ciudades ON guias.idciudad = ciudades.id";
         $xSQL .= " INNER JOIN tipos ON guias.idtipo = tipos.id";
         $xSQL .= " INNER JOIN valortipcat ON guias.idvalortipcat = valortipcat.id";
         $xSQL .= " WHERE guias.activo =  1 AND guias.idciudad = " . $args["id"];
@@ -81,7 +122,7 @@
 
     //Obtener una Guia en particular
     $app->get("/guia/{id:[0-9]+}", function (Request $request, Response $response, array $args) {
-        $xSQL = "SELECT guias.*, usuarios.nombre AS nombreusuario, ciudades.iddepartamento, ciudades.nombre AS nombreciudad, departamentos.nombre AS nombredepartamento, tiposcategorias.id AS idtipocategorias FROM guias";
+        $xSQL = "SELECT guias.*, usuarios.nombre AS nombreusuario, ciudades.iddepartamento, ciudades.caracteristica, ciudades.nombre AS nombreciudad, departamentos.nombre AS nombredepartamento, tiposcategorias.id AS idtipocategorias FROM guias";
         $xSQL .= " INNER JOIN ciudades ON guias.idciudad = ciudades.id";
         $xSQL .= " INNER JOIN departamentos ON ciudades.iddepartamento = departamentos.id";
         $xSQL .= " INNER JOIN valortipcat ON guias.idvalortipcat = valortipcat.id";

@@ -4,7 +4,7 @@
 
     //Atractivos
 
-    //Datos de un atractivo Particular
+    //Datos de un Atractivo Particular
     $app->get("/atractivo/{id:[0-9]+}", function (Request $request, Response $response, array $args) {
         $xSQL = "SELECT * FROM atractivos WHERE id = " . $args["id"];
         $respuesta = dbGet($xSQL);

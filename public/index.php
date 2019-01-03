@@ -8,6 +8,7 @@
     require "../src/config/db.php";
     require "../src/config/dbActions.php";
     require "../src/config/Validate.php";
+    require "../src/config/Utils.php";
 
     $dotenv = new Dotenv\Dotenv(__DIR__);
     $dotenv->load();
@@ -31,6 +32,7 @@
     $container["upload_directory_logo"] = __DIR__ . DIRECTORY_SEPARATOR . "logos";
     $container["upload_directory_atractivo"] = __DIR__ . DIRECTORY_SEPARATOR . "atractivos";
     $container["upload_directory_novedades"] = __DIR__ . DIRECTORY_SEPARATOR . "recursos" . DIRECTORY_SEPARATOR . "novedades";
+    $container["upload_directory_eventos"] = __DIR__ . DIRECTORY_SEPARATOR . "recursos" . DIRECTORY_SEPARATOR . "eventos";
 
     //Zonas
     $container["upload_directory_mapa"] = __DIR__ . DIRECTORY_SEPARATOR . "mapas";
@@ -84,12 +86,11 @@
             ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
         
         // Sin Token /user/login (Logueo de Usuario)
-        $path = $request->getUri()->getPath();
-        if($path === "/user/loginx") {
+        if(strpos($request->getUri()->getPath(), "user") !== false) {
             return $next($request, $response);
         } else {
+            $auth = true; //false;
             /*
-            $auth = false;
             if($request->hasHeader('HTTP_AUTHORIZATION') && (count($request->getHeader('HTTP_AUTHORIZATION')) > 0)) {
                 $auth_token = trim($request->getHeader('HTTP_AUTHORIZATION')[0]);
                 if(strpos(strtolower($auth_token), 'bearer ') !== false) {
@@ -109,7 +110,6 @@
                 }
             }
             */
-            $auth = true; //Borrar esta linea y descomentar el código anterior
             if($auth === true) {
                 return $next($request, $response);
             } else {
@@ -168,6 +168,8 @@
     require "../src/routes/atractivos.php";
     //Novedades
     require "../src/routes/novedades.php";
+    //Eventos
+    require "../src/routes/eventos.php";
 
 
     //Cors

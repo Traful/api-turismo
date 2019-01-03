@@ -52,6 +52,72 @@
 										$this->errnum = true;
 									}
 									break;
+								case "date":
+									//Probar
+									$tempDate = explode('-', $valor);
+									if(count($tempDate) != 3) {
+										if(isset($reglas["tag"])) {
+											$this->msgsError[] = $reglas["tag"] . " no es una fecha válida.";
+										} else {
+											$this->msgsError[] = $item . " no es una fecha válida.";
+										}
+									} else {
+										//checkdate(month, day, year)
+										if(!checkdate($tempDate[1], $tempDate[2], $tempDate[0])) {
+											if(isset($reglas["tag"])) {
+												$this->msgsError[] = $reglas["tag"] . " no es una fecha válida.";
+											} else {
+												$this->msgsError[] = $item . " no es una fecha válida.";
+											}
+										}
+									}
+									break;
+								case "time":
+									//Probar
+									$tempTime = explode(':', $valor);
+									if(count($tempTime) != 3) {
+										if(isset($reglas["tag"])) {
+											$this->msgsError[] = $reglas["tag"] . " no es una hora válida.";
+										} else {
+											$this->msgsError[] = $item . " no es una hora válida.";
+										}
+									} else {
+										if(is_numeric($tempTime[0]) AND is_numeric($tempTime[1]) AND is_numeric($tempTime[2])) {
+											$hora = intval($tempTime[0], 10);
+											$minutos = intval($tempTime[1], 10);
+											$segundos = intval($tempTime[2], 10);
+											if($hora < 0 OR $hora > 23) {
+												if(isset($reglas["tag"])) {
+													$this->msgsError[] = $reglas["tag"] . " no es una hora válida.";
+												} else {
+													$this->msgsError[] = $item . " no es una hora válida.";
+												}
+											} else {
+												if($minutos < 0 OR $minutos > 59) {
+													if(isset($reglas["tag"])) {
+														$this->msgsError[] = $reglas["tag"] . " no es una hora válida.";
+													} else {
+														$this->msgsError[] = $item . " no es una hora válida.";
+													}
+												} else {
+													if($segundos < 0 OR $segundos > 59) {
+														if(isset($reglas["tag"])) {
+															$this->msgsError[] = $reglas["tag"] . " no es una hora válida.";
+														} else {
+															$this->msgsError[] = $item . " no es una hora válida.";
+														}
+													}
+												}
+											}
+										} else {
+											if(isset($reglas["tag"])) {
+												$this->msgsError[] = $reglas["tag"] . " no es una hora válida.";
+											} else {
+												$this->msgsError[] = $item . " no es una hora válida.";
+											}
+										}
+									}
+									break;
 								case "mayorcero":
 									if(!$this->errnum) {
 										if($valor <= 0) {

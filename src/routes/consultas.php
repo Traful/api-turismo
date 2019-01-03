@@ -113,6 +113,15 @@
             ->withHeader("Content-Type", "application/pdf");   
     });
 
+    //Detalles de la Guia
+    $app->get("/detalles/{id}", function (Request $request, Response $response, array $args) {
+        $reg_guia = dbGet($args["id"]);
+        return $response
+            ->withStatus(200)
+            ->withHeader("Content-Type", "application/json")
+            ->write(json_encode($reg_guia, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+    });
+
     //Detalles de una Guia (PDF)
     $app->get("/detalle/{id:[0-9]+}", function (Request $request, Response $response, array $args) {
         //Datos de la Guía

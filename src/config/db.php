@@ -2,18 +2,9 @@
     class DB {
         //DB Conection Settings
         private $db_host = "localhost";
-        
-        //Online
-        private $db_name = "u516024333_tur";
-        private $db_user_name = "u516024333_tur";
-        private $db_user_password = "turismosl";
-
-        //Local
-        /*
         private $db_name = "turismo";
         private $db_user_name = "root";
         private $db_user_password = "";
-        */
         
         //Class Settings
         private $conn = null;
@@ -27,7 +18,6 @@
         public function connect() {
             $this->conn = null;
 			try {
-				//$this->conn = new PDO("mysql:host=" . $this->db_host . ";dbname=" . $this->db_name, $this->db_user_name, $this->db_user_password, array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"));
                 $this->conn = new PDO("mysql:host=" . $this->db_host . ";dbname=" . $this->db_name, $this->db_user_name, $this->db_user_password);
                 $this->conn->exec("set names utf8");
                 $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);

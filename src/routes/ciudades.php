@@ -4,7 +4,7 @@
 
     //Ciudades
 
-    //Todos los Atractivos de una Ciudad (Loclidad)
+    //Todos los Atractivos de una Ciudad (Localidad)
     $app->get("/ciudad/{id:[0-9]+}/atractivos", function (Request $request, Response $response, array $args) {
         $xSQL = "SELECT * FROM atractivos";
         $xSQL .= " WHERE atractivos.idlocalidad = " . $args["id"];
@@ -16,7 +16,20 @@
             ->write(json_encode($respuesta, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
     });
 
-    //Todos los Atractivos de una Ciudad (Loclidad) + Imágenes
+    //Todos los Atractivos de una Ciudad (Localidad) Imperdibles
+    $app->get("/ciudad/{id:[0-9]+}/atractivos/imperdibles", function (Request $request, Response $response, array $args) {
+        $xSQL = "SELECT * FROM atractivos";
+        $xSQL .= " WHERE atractivos.idlocalidad = " . $args["id"];
+        $xSQL .= " AND atractivos.imperdible = 1";
+        $xSQL .= " ORDER BY atractivos.nombre";
+        $respuesta = dbGet($xSQL);
+        return $response
+            ->withStatus(200)
+            ->withHeader("Content-Type", "application/json")
+            ->write(json_encode($respuesta, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+    });
+
+    //Todos los Atractivos de una Ciudad (Localidad) + Imágenes
     $app->get("/ciudad/{id:[0-9]+}/atractivos/imagenes", function (Request $request, Response $response, array $args) {
         $xSQL = "SELECT atractivos.*, ciudades.nombre AS localidad FROM atractivos";
         $xSQL .= " INNER JOIN ciudades ON atractivos.idlocalidad = ciudades.id";
